@@ -5,11 +5,23 @@ import React, { useState, useEffect } from "react";
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
-  const calendarUrl = typeof window !== "undefined" ? `${window.location.origin}/api/calendar` : "https://SUA-URL.vercel.app/api/calendar";
-  const webcalUrl = typeof window !== "undefined" ? `webcal://${window.location.host}/api/calendar` : "webcal://SUA-URL.vercel.app/api/calendar";
+  const [isAndroid, setIsAndroid] = useState(false);
+
+  // Hardcode the production URL for correct deep links
+  const PRODUCTION_HOST = "wc-calendar.vercel.app";
+  const calendarUrl = `https://${PRODUCTION_HOST}/api/calendar`;
+  const webcalUrl = `webcal://${PRODUCTION_HOST}/api/calendar`;
+
+  // Google Calendar subscribe link: raw URL, NOT encoded
+  // Format: https://calendar.google.com/calendar/r?cid=https://domain.com/feed.ics
+  const googleCalUrl = `https://calendar.google.com/calendar/r?cid=${calendarUrl}`;
+
+  // Outlook web subscribe link
+  const outlookUrl = `https://outlook.office.com/calendar/0/addfromweb?url=${encodeURIComponent(calendarUrl)}&name=Copa%20do%20Mundo%202026`;
 
   useEffect(() => {
     setMounted(true);
+    setIsAndroid(/android/i.test(navigator.userAgent));
   }, []);
 
   const copyToClipboard = () => {
@@ -47,7 +59,7 @@ export default function Home() {
           </p>
         </header>
 
-        {/* ========== QUICK SUBSCRIBE - FIRST SECTION ========== */}
+        {/* ========== QUICK SUBSCRIBE - HERO SECTION ========== */}
         <section className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
@@ -58,9 +70,9 @@ export default function Home() {
               <p className="text-center text-slate-400 mb-8">Clique no seu app de calendário e pronto!</p>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Google Calendar - uses webcal:// in cid param */}
+                {/* Google Calendar */}
                 <a
-                  href={`https://calendar.google.com/calendar/r?cid=${webcalUrl}`}
+                  href={googleCalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-3 px-6 py-5 bg-[#4285F4]/10 hover:bg-[#4285F4]/25 border border-[#4285F4]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-base hover:shadow-[0_0_20px_rgba(66,133,244,0.3)]"
@@ -68,7 +80,7 @@ export default function Home() {
                   <span className="text-2xl">📅</span> Google Agenda
                 </a>
 
-                {/* Apple Calendar - webcal:// protocol */}
+                {/* Apple Calendar - webcal:// protocol (works on iOS/macOS, not Android) */}
                 <a
                   href={webcalUrl}
                   className="flex items-center justify-center gap-3 px-6 py-5 bg-[#FF2D55]/10 hover:bg-[#FF2D55]/25 border border-[#FF2D55]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-base hover:shadow-[0_0_20px_rgba(255,45,85,0.3)]"
@@ -76,9 +88,9 @@ export default function Home() {
                   <span className="text-2xl">🍎</span> Apple Calendar
                 </a>
 
-                {/* Outlook - addfromweb endpoint */}
+                {/* Outlook */}
                 <a
-                  href={`https://outlook.office.com/calendar/0/addfromweb?url=${encodeURIComponent(calendarUrl)}&name=Copa%20do%20Mundo%202026`}
+                  href={outlookUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-3 px-6 py-5 bg-[#0078D4]/10 hover:bg-[#0078D4]/25 border border-[#0078D4]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-base hover:shadow-[0_0_20px_rgba(0,120,212,0.3)]"
@@ -87,7 +99,17 @@ export default function Home() {
                 </a>
               </div>
 
-              {/* Download .ics fallback */}
+              {/* Android notice */}
+              {isAndroid && (
+                <div className="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl text-sm text-yellow-400/90 text-center">
+                  <p className="font-semibold mb-1">📱 Usuário Android?</p>
+                  <p className="text-yellow-400/70">O Google Agenda no Android não suporta assinar calendários diretamente pelo app.
+                    Clique em <strong>"Google Agenda"</strong> acima para abrir no navegador e confirmar a assinatura.
+                    Depois, o calendário sincronizará automaticamente no seu celular.</p>
+                </div>
+              )}
+
+              {/* Download .ics fallback + Copy */}
               <div className="mt-6 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a
                   href="/api/calendar"
