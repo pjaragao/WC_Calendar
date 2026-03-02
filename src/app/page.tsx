@@ -75,9 +75,38 @@ export default function Home() {
                   </div>
                   <a
                     href="/api/calendar"
-                    className="flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] active:scale-95"
+                    className="flex items-center justify-center gap-2 px-6 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold transition-all active:scale-95"
                   >
-                    ⬇️ Baixar .ics
+                    ⬇️ .ics
+                  </a>
+                </div>
+              </div>
+
+              {/* Quick Subscribe Buttons */}
+              <div className="mt-8 pt-8 border-t border-white/5">
+                <p className="text-center text-sm text-slate-500 mb-6 uppercase tracking-widest font-semibold">Assinatura Rápida (Um clique)</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <a
+                    href={`https://www.google.com/calendar/render?cid=${encodeURIComponent(calendarUrl)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 px-6 py-4 bg-[#4285F4]/10 hover:bg-[#4285F4]/20 border border-[#4285F4]/20 text-[#4285F4] rounded-xl font-bold transition-all active:scale-95 text-sm"
+                  >
+                    <span>📅</span> Google Calendar
+                  </a>
+                  <a
+                    href={`webcal://${calendarUrl.replace(/^https?:\/\//, '')}`}
+                    className="flex items-center justify-center gap-3 px-6 py-4 bg-[#FF2D55]/10 hover:bg-[#FF2D55]/20 border border-[#FF2D55]/20 text-[#FF2D55] rounded-xl font-bold transition-all active:scale-95 text-sm"
+                  >
+                    <span>🍎</span> Apple / iCal
+                  </a>
+                  <a
+                    href={`https://outlook.office.com/calendar/0/addcalendar?url=${encodeURIComponent(calendarUrl)}&name=Copa%20do%20Mundo%202026`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 px-6 py-4 bg-[#0078D4]/10 hover:bg-[#0078D4]/20 border border-[#0078D4]/20 text-[#0078D4] rounded-xl font-bold transition-all active:scale-95 text-sm"
+                  >
+                    <span>📧</span> Outlook Web
                   </a>
                 </div>
               </div>
