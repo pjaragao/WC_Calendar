@@ -49,9 +49,9 @@ export async function GET() {
         // Create the standard iCalendar file content
         const { error, value: icsContent } = ics.createEvents(events as ics.EventAttributes[]);
 
-        if (error) {
-            console.error('ICS Generation Error:', error);
-            return NextResponse.json({ error: 'Failed to generate calendar' }, { status: 500 });
+        if (error || !icsContent) {
+            console.error('ICS Generation Error or Empty Content:', error);
+            return NextResponse.json({ error: 'Failed to generate calendar content' }, { status: 500 });
         }
 
         // Add Calendar Name for better client support (Google/Outlook/Apple)
