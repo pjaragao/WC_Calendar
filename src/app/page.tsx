@@ -5,15 +5,13 @@ import React, { useState, useEffect } from "react";
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isAndroid, setIsAndroid] = useState(false);
 
   // Hardcode the production URL for correct deep links
   const PRODUCTION_HOST = "wc-calendar.vercel.app";
   const calendarUrl = `https://${PRODUCTION_HOST}/api/calendar`;
   const webcalUrl = `webcal://${PRODUCTION_HOST}/api/calendar`;
 
-  // Google Calendar subscribe link: raw URL, NOT encoded
-  // Format: https://calendar.google.com/calendar/r?cid=https://domain.com/feed.ics
+  // Google Calendar subscribe link
   const googleCalUrl = `https://calendar.google.com/calendar/r?cid=${calendarUrl}`;
 
   // Outlook web subscribe link
@@ -21,7 +19,6 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    setIsAndroid(/android/i.test(navigator.userAgent));
   }, []);
 
   const copyToClipboard = () => {
@@ -59,7 +56,7 @@ export default function Home() {
           </p>
         </header>
 
-        {/* ========== QUICK SUBSCRIBE - HERO SECTION ========== */}
+        {/* ========== HERO: COPY LINK + DOWNLOAD ========== */}
         <section className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
@@ -67,69 +64,39 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-white mb-2 text-center flex items-center justify-center gap-3">
                 <span className="text-3xl">⚡</span> Adicionar ao Calendário
               </h2>
-              <p className="text-center text-slate-400 mb-8">Clique no seu app de calendário e pronto!</p>
+              <p className="text-center text-slate-400 mb-8">Copie o link abaixo e cole no seu app de calendário favorito.</p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Google Calendar */}
-                <a
-                  href={googleCalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-3 px-6 py-5 bg-[#4285F4]/10 hover:bg-[#4285F4]/25 border border-[#4285F4]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-base hover:shadow-[0_0_20px_rgba(66,133,244,0.3)]"
+              {/* Link for copy */}
+              <div className="relative mb-6">
+                <input
+                  readOnly
+                  value={calendarUrl}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-sm font-mono text-blue-400 focus:outline-none focus:border-blue-500/50 transition-colors pr-24"
+                />
+                <button
+                  onClick={copyToClipboard}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-semibold text-white transition-all active:scale-95"
                 >
-                  <span className="text-2xl">📅</span> Google Agenda
-                </a>
-
-                {/* Apple Calendar - webcal:// protocol (works on iOS/macOS, not Android) */}
-                <a
-                  href={webcalUrl}
-                  className="flex items-center justify-center gap-3 px-6 py-5 bg-[#FF2D55]/10 hover:bg-[#FF2D55]/25 border border-[#FF2D55]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-base hover:shadow-[0_0_20px_rgba(255,45,85,0.3)]"
-                >
-                  <span className="text-2xl">🍎</span> Apple Calendar
-                </a>
-
-                {/* Outlook - webcal:// opens the Outlook app on mobile */}
-                <a
-                  href={webcalUrl}
-                  className="flex items-center justify-center gap-3 px-6 py-5 bg-[#0078D4]/10 hover:bg-[#0078D4]/25 border border-[#0078D4]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-base hover:shadow-[0_0_20px_rgba(0,120,212,0.3)]"
-                >
-                  <span className="text-2xl">📧</span> Outlook
-                </a>
+                  {copied ? "✅ Copiado!" : "📋 Copiar"}
+                </button>
               </div>
 
-              {/* Android notice */}
-              {isAndroid && (
-                <div className="mt-6 p-4 bg-yellow-500/5 border border-yellow-500/20 rounded-xl text-sm text-yellow-400/90 text-center">
-                  <p className="font-semibold mb-1">📱 Usuário Android?</p>
-                  <p className="text-yellow-400/70">O Google Agenda no Android não suporta assinar calendários diretamente pelo app.
-                    Clique em <strong>"Google Agenda"</strong> acima para abrir no navegador e confirmar a assinatura.
-                    Depois, o calendário sincronizará automaticamente no seu celular.</p>
-                </div>
-              )}
-
-              {/* Download .ics fallback + Copy */}
-              <div className="mt-6 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-4">
+              {/* Download .ics */}
+              <div className="flex justify-center">
                 <a
                   href="/api/calendar"
                   className="flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl font-semibold transition-all active:scale-95 text-sm"
                 >
-                  ⬇️ Baixar arquivo .ics
+                  ⬇️ Ou baixe o arquivo .ics diretamente
                 </a>
-                <span className="text-slate-600 text-xs hidden sm:block">|</span>
-                <button
-                  onClick={copyToClipboard}
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 rounded-xl font-semibold transition-all active:scale-95 text-sm"
-                >
-                  {copied ? "✅ Link Copiado!" : "📋 Copiar Link do Calendário"}
-                </button>
               </div>
             </div>
           </div>
         </section>
 
         {/* ========== MANUAL INSTRUCTIONS ========== */}
-        <section className="mb-16">
-          <h3 className="text-center text-sm text-slate-500 mb-8 uppercase tracking-widest font-semibold">Ou adicione manualmente</h3>
+        <section className="mb-12">
+          <h3 className="text-center text-sm text-slate-500 mb-8 uppercase tracking-widest font-semibold">Como adicionar passo a passo</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-400">
             {/* Card 1: Google */}
             <div className="bg-[#121216]/50 border border-white/5 p-8 rounded-2xl hover:bg-[#16161c]/80 transition-all group">
@@ -170,23 +137,34 @@ export default function Home() {
               </ol>
             </div>
           </div>
+        </section>
 
-          {/* Link for manual copy */}
-          <div className="mt-8 bg-[#121216]/50 border border-white/5 p-6 rounded-2xl">
-            <p className="text-sm text-slate-500 mb-3 text-center">Link para colar manualmente:</p>
-            <div className="relative">
-              <input
-                readOnly
-                value={calendarUrl}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-sm font-mono text-blue-400 focus:outline-none focus:border-blue-500/50 transition-colors pr-24"
-              />
-              <button
-                onClick={copyToClipboard}
-                className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-semibold text-white transition-all active:scale-95"
-              >
-                {copied ? "Copiado!" : "Copiar"}
-              </button>
-            </div>
+        {/* ========== DESKTOP-ONLY: QUICK SUBSCRIBE BUTTONS ========== */}
+        <section className="mb-16 hidden md:block">
+          <h3 className="text-center text-sm text-slate-500 mb-6 uppercase tracking-widest font-semibold">Atalhos rápidos (desktop)</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <a
+              href={googleCalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-3 px-6 py-4 bg-[#4285F4]/10 hover:bg-[#4285F4]/25 border border-[#4285F4]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-sm hover:shadow-[0_0_20px_rgba(66,133,244,0.3)]"
+            >
+              <span className="text-xl">📅</span> Google Agenda
+            </a>
+            <a
+              href={webcalUrl}
+              className="flex items-center justify-center gap-3 px-6 py-4 bg-[#FF2D55]/10 hover:bg-[#FF2D55]/25 border border-[#FF2D55]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-sm hover:shadow-[0_0_20px_rgba(255,45,85,0.3)]"
+            >
+              <span className="text-xl">🍎</span> Apple Calendar
+            </a>
+            <a
+              href={outlookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-3 px-6 py-4 bg-[#0078D4]/10 hover:bg-[#0078D4]/25 border border-[#0078D4]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-sm hover:shadow-[0_0_20px_rgba(0,120,212,0.3)]"
+            >
+              <span className="text-xl">📧</span> Outlook Web
+            </a>
           </div>
         </section>
 
