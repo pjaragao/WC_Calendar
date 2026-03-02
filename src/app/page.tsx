@@ -88,11 +88,9 @@ export default function Home() {
                   <span className="text-2xl">🍎</span> Apple Calendar
                 </a>
 
-                {/* Outlook */}
+                {/* Outlook - webcal:// opens the Outlook app on mobile */}
                 <a
-                  href={outlookUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={webcalUrl}
                   className="flex items-center justify-center gap-3 px-6 py-5 bg-[#0078D4]/10 hover:bg-[#0078D4]/25 border border-[#0078D4]/30 text-white rounded-xl font-bold transition-all active:scale-95 text-base hover:shadow-[0_0_20px_rgba(0,120,212,0.3)]"
                 >
                   <span className="text-2xl">📧</span> Outlook
