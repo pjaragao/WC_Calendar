@@ -55,8 +55,12 @@ export async function GET() {
         }
 
         // Add Calendar Name for better client support (Google/Outlook/Apple)
-        const brandedIcs = icsContent
-            .replace('BEGIN:VCALENDAR', 'BEGIN:VCALENDAR\r\nX-WR-CALNAME:Copa do Mundo 2026\r\nNAME:Copa do Mundo 2026\r\nMETHOD:PUBLISH');
+        // ICS requires CRLF (\r\n) line endings - use template literal for real newlines
+        const CRLF = "\r\n";
+        const brandedIcs = icsContent.replace(
+            "BEGIN:VCALENDAR",
+            `BEGIN:VCALENDAR${CRLF}X-WR-CALNAME:Copa do Mundo 2026${CRLF}NAME:Copa do Mundo 2026`
+        );
 
         return new Response(brandedIcs, {
             status: 200,
