@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# World Cup Calendar 2026 🌍🏆
 
-## Getting Started
+Automated iCalendar (.ics) feed for the FIFA World Cup 2026. Subscribable via Google Calendar, Outlook, and Apple Calendar.
 
-First, run the development server:
+## Features
+- ✅ **Dynamic Feed**: Real-time match data from the Football Data API.
+- ✅ **Premium UI**: Modern, responsive landing page with dark mode support.
+- ✅ **One-Click Subscription**: Easy copy-paste instructions for all major calendar platforms.
+- ✅ **Auto-Updates**: Once subscribed, the calendar updates itself as match dates or teams (e.g., knockout stages) are confirmed.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup & Local Development
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/pjaragao/WC_Calendar.git
+   cd wc-calendar-app
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Configure Environment Variables**:
+   Create a `.env.local` file based on `.env.example`:
+   ```bash
+   FOOTBALL_DATA_API_KEY=your_api_key_here
+   ```
+   *Get your free API key at [football-data.org](https://www.football-data.org/).*
 
-## Learn More
+4. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
+   Access the UI at `http://localhost:3000` and the ICS feed at `http://localhost:3000/api/calendar`.
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment (Vercel)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project is optimized for [Vercel](https://vercel.com/):
+1. Connect your GitHub repository to Vercel.
+2. Add the `FOOTBALL_DATA_API_KEY` to your project's Environment Variables in the Vercel dashboard.
+3. Deploy!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Credits
+Data provided by [football-data.org](https://www.football-data.org/).
