@@ -37,7 +37,7 @@ export async function GET() {
             return {
                 start: [year, month, date, hours, minutes],
                 duration: { hours: 2, minutes: 0 },
-                title: `⚽ Copa do Mundo 2026: ${homeTeam} x ${awayTeam}`,
+                title: `⚽${homeTeam} x ${awayTeam} - Copa do Mundo 2026`,
                 description: `Jogo da Copa do Mundo 2026.\nFase/Grupo: ${groupOrStage}\n${match.venue ? 'Estádio: ' + match.venue : ''
                     }`,
                 status: match.status === 'FINISHED' ? 'CONFIRMED' : 'TENTATIVE',
@@ -54,7 +54,11 @@ export async function GET() {
             return NextResponse.json({ error: 'Failed to generate calendar' }, { status: 500 });
         }
 
-        return new Response(icsContent, {
+        // Add Calendar Name for better client support (Google/Outlook/Apple)
+        const brandedIcs = icsContent
+            .replace('BEGIN:VCALENDAR', 'BEGIN:VCALENDAR\r\nX-WR-CALNAME:Copa do Mundo 2026\r\nNAME:Copa do Mundo 2026\r\nMETHOD:PUBLISH');
+
+        return new Response(brandedIcs, {
             status: 200,
             headers: {
                 'Content-Type': 'text/calendar; charset=utf-8',
