@@ -1,9 +1,24 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
-import * as ics from 'ics';
 import { parseISO } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
+
+// Format date to ICS DTSTART format: 20260611T120000Z
+function formatICSDate(date: Date): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
+}
+
+// Add 2 hours for match duration
+function addHours(date: Date, hours: number): Date {
+    return new Date(date.getTime() + hours * 60 * 60 * 1000);
+}
+
+// Generate a deterministic UID for each match
+function generateUID(matchId: number): string {
+    return `match-${matchId}@wc-calendar.vercel.app`;
+}
 
 export async function GET() {
     try {
@@ -17,56 +32,54 @@ export async function GET() {
         );
 
         const matches = response.data.matches || [];
+        const now = new Date();
+        const CRLF = '\r\n';
 
-        const events = matches.map((match: any) => {
-            // API dates are in UTC, example: '2026-06-11T12:00:00Z'
-            const matchDateUTC = parseISO(match.utcDate);
+        // Build ICS manually for full RFC 5545 compliance
+        let icsLines: string[] = [];
 
-            // Parse the date array format required by ics 
-            // [year, month, date, hours, minutes]
-            const year = matchDateUTC.getUTCFullYear();
-            const month = matchDateUTC.getUTCMonth() + 1; // 0-indexed
-            const date = matchDateUTC.getUTCDate();
-            const hours = matchDateUTC.getUTCHours();
-            const minutes = matchDateUTC.getUTCMinutes();
+        icsLines.push('BEGIN:VCALENDAR');
+        icsLines.push('VERSION:2.0');
+        icsLines.push('PRODID:-//WC Calendar//Copa do Mundo 2026//PT');
+        icsLines.push('CALSCALE:GREGORIAN');
+        icsLines.push('METHOD:PUBLISH');
+        icsLines.push('X-WR-CALNAME:Copa do Mundo 2026');
+        icsLines.push('X-WR-TIMEZONE:UTC');
 
-            const homeTeam = match.homeTeam?.name || 'Vencedor Chave';
-            const awayTeam = match.awayTeam?.name || 'Vencedor Chave';
-            const groupOrStage = match.group || match.stage.replace(/_/g, ' ');
+        for (const match of matches) {
+            const matchDate = parseISO(match.utcDate);
+            const endDate = addHours(matchDate, 2);
 
-            return {
-                start: [year, month, date, hours, minutes],
-                duration: { hours: 2, minutes: 0 },
-                title: `⚽${homeTeam} x ${awayTeam} - Copa do Mundo 2026`,
-                description: `Jogo da Copa do Mundo 2026.\nFase/Grupo: ${groupOrStage}\n${match.venue ? 'Estádio: ' + match.venue : ''
-                    }`,
-                status: match.status === 'FINISHED' ? 'CONFIRMED' : 'TENTATIVE',
-                busyStatus: 'BUSY',
-                categories: ['Sports', 'Football', 'Soccer', 'World Cup'],
-            };
-        });
+            const homeTeam = match.homeTeam?.name || 'A Definir';
+            const awayTeam = match.awayTeam?.name || 'A Definir';
+            const groupOrStage = match.group || (match.stage ? match.stage.replace(/_/g, ' ') : '');
+            const venue = match.venue || '';
 
-        // Create the standard iCalendar file content
-        const { error, value: icsContent } = ics.createEvents(events as ics.EventAttributes[]);
+            const summary = `⚽${homeTeam} x ${awayTeam} - Copa do Mundo 2026`;
+            const description = `Jogo da Copa do Mundo 2026.\\nFase/Grupo: ${groupOrStage}${venue ? '\\nEstádio: ' + venue : ''}`;
 
-        if (error || !icsContent) {
-            console.error('ICS Generation Error or Empty Content:', error);
-            return NextResponse.json({ error: 'Failed to generate calendar content' }, { status: 500 });
+            icsLines.push('BEGIN:VEVENT');
+            icsLines.push(`UID:${generateUID(match.id)}`);
+            icsLines.push(`DTSTAMP:${formatICSDate(now)}`);
+            icsLines.push(`DTSTART:${formatICSDate(matchDate)}`);
+            icsLines.push(`DTEND:${formatICSDate(endDate)}`);
+            icsLines.push(`SUMMARY:${summary}`);
+            icsLines.push(`DESCRIPTION:${description}`);
+            icsLines.push(`STATUS:${match.status === 'FINISHED' ? 'CONFIRMED' : 'TENTATIVE'}`);
+            icsLines.push('TRANSP:OPAQUE');
+            icsLines.push(`CATEGORIES:Sports,Football,World Cup`);
+            icsLines.push('END:VEVENT');
         }
 
-        // Add Calendar Name for better client support (Google/Outlook/Apple)
-        // ICS requires CRLF (\r\n) line endings - use template literal for real newlines
-        const CRLF = "\r\n";
-        const brandedIcs = icsContent.replace(
-            "BEGIN:VCALENDAR",
-            `BEGIN:VCALENDAR${CRLF}X-WR-CALNAME:Copa do Mundo 2026${CRLF}NAME:Copa do Mundo 2026`
-        );
+        icsLines.push('END:VCALENDAR');
 
-        return new Response(brandedIcs, {
+        const icsContent = icsLines.join(CRLF) + CRLF;
+
+        return new Response(icsContent, {
             status: 200,
             headers: {
                 'Content-Type': 'text/calendar; charset=utf-8',
-                'Content-Disposition': 'attachment; filename="copa-do-mundo-2026.ics"',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
             },
         });
     } catch (error: any) {
